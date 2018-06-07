@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<style type="text/css">
+		* {
+			padding: 0;
+			margin: 0;
+			list-style: none;
+			border: 0;
+		}
+		
+		.all {
+			width: 500px;
+			height: 200px;
+			padding: 7px;
+			border: 1px solid #ccc;
+			margin: 100px auto;
+			position: relative;
+		}
+		
+		.screen {
+			width: 500px;
+			height: 200px;
+			overflow: hidden;
+			position: relative;
+		}
+		
+		.screen li {
+			width: 500px;
+			height: 200px;
+			overflow: hidden;
+			float: left;
+		}
+		
+		.screen ul {
+			position: absolute;
+			/* left: 0; */
+			left: -500px;
+			top: 0px;
+			width: 3500px;
+		}
+		
+		.all ol {
+			position: absolute;
+			right: 10px;
+			bottom: 10px;
+			line-height: 20px;
+			text-align: center;
+		}
+		
+		.all ol li {
+			float: left;
+			width: 20px;
+			height: 20px;
+			background: #fff;
+			border: 1px solid #ccc;
+			margin-left: 10px;
+			cursor: pointer;
+		}
+		
+		.all ol li.current {
+			background: yellow;
+		}
+		
+		#arr {
+			display: none;
+			z-index: 1000;
+			
+		}
+		
+		#arr span {
+			width: 40px;
+			height: 40px;
+			position: absolute;
+			left: 5px;
+			top: 50%;
+			margin-top: -20px;
+			background: #000;
+			cursor: pointer;
+			line-height: 40px;
+			text-align: center;
+			font-weight: bold;
+			font-family: '黑体';
+			font-size: 30px;
+			color: #fff;
+			opacity: 0.3;
+			border: 1px solid #fff;
+		}
+		
+		#arr #right {
+			right: 5px;
+			left: auto;
+		}
+	</style>
+</head>
+
+<body>
+<div class="all" id='box'>
+	<div class="screen">
+		<ul>
+			<li>
+				<img src="images/wf5.jpg" width="500" height="200"/>
+			</li>
+			<li>
+				<img src="images/wf1.jpg" width="500" height="200"/>
+			</li>
+			<li>
+				<img src="images/wf2.jpg" width="500" height="200"/>
+			</li>
+			<li>
+				<img src="images/wf3.jpg" width="500" height="200"/>
+			</li>
+			<li>
+				<img src="images/wf4.jpg" width="500" height="200"/>
+			</li>
+			<li>
+				<img src="images/wf5.jpg" width="500" height="200"/>
+			</li>
+			<li>
+				<img src="images/wf1.jpg" width="500" height="200"/>
+			</li>
+		</ul>
+		<ol>
+			<li class="current">1</li>
+			<li>2</li>
+			<li>3</li>
+			<li>4</li>
+			<li>5</li>
+		</ol>
+	</div>
+	<div id="arr">
+		<span id="left">&lt;</span>
+		<span id="right">&gt;</span>
+	</div>
+</div>
+<script src="animate.js"></script>
+<script>
+	// 每张图长度为 500 px;
+	// 图 开始时为 -500 px, index = 1;
+	// 当图到第五张图时，index = 5；
+	// 之后进入 index = 6，即第五张图后的第一张图
+	// 此时跳入第一张图 使 index = 1;
+	var imgUl = document.querySelector('.screen ul');
+	var lis = document.querySelectorAll('ol li');
+	var box = document.querySelector('#box');
+	var arr = document.querySelector('#arr');
+	var left = document.querySelector('#left');
+	var right = document.querySelector('#right');
+	var index = 1;
+
+	// index 0 1 2 3 4 5 6
+	// lis   4 0 1 2 3 4 0
+	// img   5 1 2 3 4 5 1
+	// 向左滚动
+	function turnleft() {
+		// imgUl 在 滚动
+		// 当 index = 6 时，跳到 index = 1 的地方
+		// 设置定时器 执行滚动
+		// 每次 index 加 1
+		if (index == 6) {
+			imgUl.style.left = '-500px';
+			index = 1;
+		}
+		index++;
+		animate(imgUl, -500 * index);
+		refresh();
+	};
+
+	// 向右滚动
+	function turnright() {
+		// index = 0 时 跳到 index = 5
+		// imgUl 的 left 变为 -2500px
+		if (index == 0) {
+			imgUl.style.left = '-2500px';
+			index = 5;
+		}
+		index--;
+		animate(imgUl, -500 * index);
+		refresh();
+	};
+
+	// 刷新编号
+	function refresh() {
+		lis.forEach(function (v) {
+			v.className = '';
+		});
+		if (index == 0) {
+			lis[4].className = 'current';
+		} else if (index == 6) {
+			lis[0].className = 'current';
+		} else {
+			lis[index - 1].className = 'current';
+		}
+	};
+	// 鼠标放入时
+	box.onmouseover = function () {
+		arr.style.display = 'block';
+		clearInterval(timer);
+	};
+	// 鼠标移出时
+	box.onmouseleave = function () {
+		arr.style.display = '';
+		timer = setInterval(turnleft, 1000);
+	};
+	// 鼠标点击左箭头
+	left.onclick = function () {
+		turnright();
+	};
+	// 鼠标点击右箭头
+	right.onclick = function () {
+		turnleft();
+	};
+	// 建立定时器
+	var timer = setInterval(turnleft, 1000);
+
+	// 点击下标进行图片的切换
+	lis.forEach(function (v, i) {
+		v.onclick = function () {
+			var select = this.innerHTML - 0;  // 本身是字符串 转换为数字
+			index = select;
+			refresh();
+			animate(imgUl, -500 * index);
+		}
+	});
+</script>
+</body>
+
+</html>
